@@ -173,7 +173,7 @@ class OCRHead_CON(BaseCascadeDecodeHeadConTrast):
         feats = object_context.permute(0, 2, 3, 1)
         feats = feats.contiguous().view(feats.shape[0], -1, feats.shape[-1])
         for ii in range(feats.shape[0]):
-            print('sum:', torch.sum(feats[ii, :, :], dim=0))
+            print('sum:', torch.sum(feats[ii, :, :], dim=1))
 
         output = OrderedDict()
         # >>> project contrast
