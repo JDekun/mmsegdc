@@ -207,8 +207,6 @@ def Contrastive(feats_x, feats_y, labels_, queue=None, queue_label=None, type: s
     mean_log_prob_pos = (ops_mask * log_prob).sum(1) / ops_mask_num
     loss = - (temperature / base_temperature) * mean_log_prob_pos
     loss = loss.mean()
-    
-    print('anchor_feature:', anchor_feature)
 
     return loss
 
@@ -254,6 +252,8 @@ def CONTRAST_Loss(cls_score_origin,
     feats = feats.contiguous().view(feats.shape[0], -1, feats.shape[-1])
     feats_y = feats_y.permute(0, 2, 3, 1)
     feats_y = feats_y.contiguous().view(feats_y.shape[0], -1, feats_y.shape[-1])
+
+    print('feats:', feats)
 
     feats_, feats_y_, labels_, feats_que_, feats_y_que_, labels_queue_ = Sampling(sample, feats, feats_y, labels, predict)
 
