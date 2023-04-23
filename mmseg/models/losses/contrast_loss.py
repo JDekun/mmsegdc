@@ -208,7 +208,7 @@ def Contrastive(feats_x, feats_y, labels_, queue=None, queue_label=None, type: s
     loss = - (temperature / base_temperature) * mean_log_prob_pos
     loss = loss.mean()
     
-    print('labels_:', labels_.item())
+    print('labels_:', labels_)
 
     return loss
 
