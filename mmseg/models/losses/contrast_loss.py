@@ -253,8 +253,6 @@ def CONTRAST_Loss(cls_score_origin,
     feats_y = feats_y.permute(0, 2, 3, 1)
     feats_y = feats_y.contiguous().view(feats_y.shape[0], -1, feats_y.shape[-1])
 
-    print('feats:', feats)
-
     feats_, feats_y_, labels_, feats_que_, feats_y_que_, labels_queue_ = Sampling(sample, feats, feats_y, labels, predict)
 
     if feats_ != None:
