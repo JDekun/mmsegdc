@@ -83,7 +83,7 @@ class ContrastCrossEntropyLoss(nn.Module):
             cls_score_origin,
             label,
             memory_size = 0,
-            sample = 'label_ave')
+            sample = 'weight_ade_8')
         return loss_cls + 0.1 * los_con
 
     @property

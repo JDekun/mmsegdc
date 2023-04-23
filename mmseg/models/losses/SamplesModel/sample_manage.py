@@ -47,8 +47,9 @@ def Sampling(type, X, Y, labels, predict, ignore_label: int = 255):
                 y_[X_ptr] = cls_id
                 X_ptr += 1
 
-                print('hard_weight:', hard_weight)
-                print('easy_weight:', easy_weight)
+                print('ade_x:', ade_x)
+                print('num_h:', num_h)
+                print('num_e:', num_e)
             else:  
                 if "adapt_excite" in type:
                     n = int(type.split('_')[-1])
