@@ -159,7 +159,7 @@ class SelfAttentionBlock(nn.Module):
         if self.out_project is not None:
             context = self.out_project(context)
 
-        feats = context.permute(0, 2, 3, 1)
+        feats = sim_map.permute(0, 2, 1)
         feats = feats.contiguous().view(feats.shape[0], -1, feats.shape[-1])
         for ii in range(feats.shape[0]):
             print('context:', torch.sum(feats[ii, :, :], dim=0))
