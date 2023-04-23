@@ -172,13 +172,14 @@ class OCRHead_CON(BaseCascadeDecodeHeadConTrast):
 
         output = OrderedDict()
         # >>> project contrast
-        proj_decode = F.normalize(self.projector_decode(object_context), dim=1)
+        temp = self.projector_decode(object_context)
+        proj_decode = F.normalize(temp, dim=1)
         proj_layer3 = F.normalize(self.projector_layer3(inputs[2]), dim=1)
 
         output["proj_decode"] = proj_decode
         output["proj_layer3"] = proj_layer3
 
-        contrast = self.de_projector(proj_decode)
+        contrast = self.de_projector(temp)
         # object_context = self.cov1(object_context)
         object_context =  self.relu(object_context + contrast)
         # project contrast <<<
