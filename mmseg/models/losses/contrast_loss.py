@@ -137,12 +137,6 @@ def Contrastive(feats_x, feats_y, labels_, queue=None, queue_label=None, type: s
     feature_x = torch.cat(torch.unbind(feats_x, dim=1), dim=0)
     feature_y = torch.cat(torch.unbind(feats_y, dim=1), dim=0)
 
-    # 默认采用 type == "double" 对比
-    anchor_feature = torch.cat([feature_x, feature_y], dim=0)
-    contrast_feature = anchor_feature
-    anchor_count = n_view * 2
-    contrast_count = n_view * 2
-
     if type == "inter":
         anchor_feature = feature_x
         contrast_feature= feature_y
@@ -153,6 +147,12 @@ def Contrastive(feats_x, feats_y, labels_, queue=None, queue_label=None, type: s
         contrast_feature= feature_x
         anchor_count = n_view
         contrast_count = n_view
+    elif type == "double":
+        # 默认采用 type == "double" 对比
+        anchor_feature = torch.cat([feature_x, feature_y], dim=0)
+        contrast_feature = anchor_feature
+        anchor_count = n_view * 2
+        contrast_count = n_view * 2
          
     # 基础mask
     labels_ = labels_.contiguous().view(-1, 1)
@@ -208,8 +208,7 @@ def Contrastive(feats_x, feats_y, labels_, queue=None, queue_label=None, type: s
     loss = - (temperature / base_temperature) * mean_log_prob_pos
     loss = loss.mean()
     
-    print('logits:', logits)
-    print('exp_logits:', exp_logits)
+    print('anchor_dot_contrast:', anchor_dot_contrast)
 
     return loss
 
