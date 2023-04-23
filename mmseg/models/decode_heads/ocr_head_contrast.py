@@ -7,8 +7,9 @@ from mmcv.cnn import ConvModule
 from mmseg.registry import MODELS
 from ..utils import SelfAttentionBlock as _SelfAttentionBlock
 from ..utils import resize
-from .cascade_decode_head import BaseCascadeDecodeHead
+from .cascade_decode_head_contrast import BaseCascadeDecodeHeadConTrast
 
+from collections import OrderedDict
 
 class SpatialGatherModule(nn.Module):
     """Aggregate the context features according to the initial predicted
@@ -79,24 +80,44 @@ class ObjectAttentionBlock(_SelfAttentionBlock):
             output = resize(query_feats)
 
         return output
+    
+class EncodeProjector(nn.Module):
+    def __init__(self, layer_channels, ocr_channels, proj_channels, conv_cfg, norm_cfg, act_cfg):
+        super().__init__()
+        self.bottleneck = ConvModule(
+            layer_channels,
+            ocr_channels,
+            1,
+            conv_cfg=conv_cfg,
+            norm_cfg=norm_cfg,
+            act_cfg=act_cfg)
+        self.projector = ConvModule(
+            ocr_channels,
+            proj_channels,
+            1,
+            conv_cfg=conv_cfg,
+            norm_cfg=norm_cfg,
+            act_cfg=act_cfg)
+        
+    def forward(self, feats):
+        feats = self.bottleneck(feats)
+        feats = self.projector(feats)
 
+        return feats
 
 @MODELS.register_module()
-class OCRHead(BaseCascadeDecodeHead):
-    """Object-Contextual Representations for Semantic Segmentation.
-
-    This head is the implementation of `OCRNet
-    <https://arxiv.org/abs/1909.11065>`_.
-
+class OCRHead_CON(BaseCascadeDecodeHeadConTrast):
+    """
     Args:
         ocr_channels (int): The intermediate channels of OCR block.
         scale (int): The scale of probability map in SpatialGatherModule in
             Default: 1.
     """
 
-    def __init__(self, ocr_channels, scale=1, **kwargs):
+    def __init__(self, ocr_channels, proj_channels=128, scale=1, **kwargs):
         super().__init__(**kwargs)
         self.ocr_channels = ocr_channels
+        self.proj_channels = proj_channels
         self.scale = scale
         self.object_context_block = ObjectAttentionBlock(
             self.channels,
@@ -115,6 +136,23 @@ class OCRHead(BaseCascadeDecodeHead):
             conv_cfg=self.conv_cfg,
             norm_cfg=self.norm_cfg,
             act_cfg=self.act_cfg)
+        
+        # >>> project contrast
+        self.projector_decode = EncodeProjector(self.channels, self.channels, proj_channels,
+                                                conv_cfg=self.conv_cfg,
+                                                norm_cfg=self.norm_cfg,
+                                                act_cfg=self.act_cfg)
+        self.projector_layer3 = EncodeProjector(1024, self.channels, proj_channels,
+                                                conv_cfg=self.conv_cfg,
+                                                norm_cfg=self.norm_cfg,
+                                                act_cfg=self.act_cfg)
+        self.de_projector = ConvModule(
+                proj_channels,
+                self.channels,
+                1,
+                conv_cfg=self.conv_cfg,
+                norm_cfg=self.norm_cfg,
+                act_cfg=self.act_cfg)
 
     def forward(self, inputs, prev_output):
         """Forward function."""
@@ -122,6 +160,20 @@ class OCRHead(BaseCascadeDecodeHead):
         feats = self.bottleneck(x)
         context = self.spatial_gather_module(feats, prev_output)
         object_context = self.object_context_block(feats, context)
-        output = self.cls_seg(object_context)
+
+        output = OrderedDict()
+        # >>> project contrast
+        proj_decode = F.normalize(self.projector_decode(object_context), dim=1)
+        proj_layer3 = F.normalize(self.projector_layer3(inputs[2]), dim=1)
+
+        output["proj_decode"] = proj_decode
+        output["proj_layer3"] = proj_layer3
+
+        contrast = self.de_projector(proj_decode)
+        object_context += contrast
+        # project contrast <<<
+
+        ocr = self.cls_seg(object_context)
+        output["decode"] = ocr
 
         return output
