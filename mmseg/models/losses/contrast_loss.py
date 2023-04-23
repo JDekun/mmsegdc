@@ -175,7 +175,7 @@ def Contrastive(feats_x, feats_y, labels_, queue=None, queue_label=None, type: s
 
 
     # 计算对比logits
-    anchor_dot_contrast = torch.div((anchor_feature, torch.transpose(contrast_feature, 0, 1)), temperature)
+    anchor_dot_contrast = torch.div(torch.matmul(anchor_feature, torch.transpose(contrast_feature, 0, 1)), temperature)
     logits_max, _ = torch.max(anchor_dot_contrast, dim=1, keepdim=True)
     logits = anchor_dot_contrast - logits_max.detach()
     # logits = anchor_dot_contrast
