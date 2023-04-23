@@ -149,12 +149,6 @@ class SelfAttentionBlock(nn.Module):
         value = value.permute(0, 2, 1).contiguous()
 
         sim_map = torch.matmul(query, key)
-
-        feats = sim_map.permute(0, 2, 1)
-        feats = feats.contiguous().view(feats.shape[0], -1, feats.shape[-1])
-        for ii in range(feats.shape[0]):
-            print('sim_map:', torch.sum(feats[ii, :, :], dim=0))
-
         if self.matmul_norm:
             sim_map = (self.channels**-.5) * sim_map
         sim_map = F.softmax(sim_map, dim=-1)

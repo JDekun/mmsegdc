@@ -34,14 +34,14 @@ def Sampling(type, X, Y, labels, predict, ignore_label: int = 255):
                 num_h = hard_indices.shape[0]
                 num_e = easy_indices.shape[0]
                 if num_e == 0:
-                    ade_x = torch.mean(X[ii, hard_indices, :], dim=0)*hard_weight
-                    ade_y = torch.mean(Y[ii, hard_indices, :], dim=0)*hard_weight
+                    ade_x = torch.nanmean(X[ii, hard_indices, :], dim=0)*hard_weight
+                    ade_y = torch.nanmean(Y[ii, hard_indices, :], dim=0)*hard_weight
                 elif num_h == 0:
-                    ade_x = torch.mean(X[ii, easy_indices, :], dim=0)*easy_weight
-                    ade_y = torch.mean(Y[ii, easy_indices, :], dim=0)*easy_weight
+                    ade_x = torch.nanmean(X[ii, easy_indices, :], dim=0)*easy_weight
+                    ade_y = torch.nanmean(Y[ii, easy_indices, :], dim=0)*easy_weight
                 else:
-                    ade_x = torch.mean(X[ii, hard_indices, :], dim=0)*hard_weight  + torch.mean(X[ii, easy_indices, :].squeeze(1), dim=0)*easy_weight
-                    ade_y = torch.mean(Y[ii, hard_indices, :], dim=0)*hard_weight  + torch.mean(Y[ii, easy_indices, :].squeeze(1), dim=0)*easy_weight
+                    ade_x = torch.nanmean(X[ii, hard_indices, :], dim=0)*hard_weight  + torch.nanmean(X[ii, easy_indices, :].squeeze(1), dim=0)*easy_weight
+                    ade_y = torch.nanmean(Y[ii, hard_indices, :], dim=0)*hard_weight  + torch.nanmean(Y[ii, easy_indices, :].squeeze(1), dim=0)*easy_weight
                 X_[X_ptr, 0, :] = ade_x
                 Y_[X_ptr, 0, :] = ade_y
                 y_[X_ptr] = cls_id
@@ -56,8 +56,8 @@ def Sampling(type, X, Y, labels, predict, ignore_label: int = 255):
 
                 temp = indices.shape[0]
                 if temp != 0:
-                    X_[X_ptr, 0, :] = torch.mean(X[ii, indices, :], dim=0)
-                    Y_[X_ptr, 0, :] = torch.mean(Y[ii, indices, :], dim=0)
+                    X_[X_ptr, 0, :] = torch.nanmean(X[ii, indices, :], dim=0)
+                    Y_[X_ptr, 0, :] = torch.nanmean(Y[ii, indices, :], dim=0)
                     y_[X_ptr] = cls_id
                 X_ptr += 1
 
