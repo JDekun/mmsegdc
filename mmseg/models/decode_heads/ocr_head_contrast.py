@@ -153,6 +153,13 @@ class OCRHead_CON(BaseCascadeDecodeHeadConTrast):
                 conv_cfg=self.conv_cfg,
                 norm_cfg=self.norm_cfg,
                 act_cfg=self.act_cfg)
+        self.cov1 = ConvModule(
+                self.channels,
+                self.channels,
+                1,
+                conv_cfg=self.conv_cfg,
+                norm_cfg=self.norm_cfg,
+                act_cfg=self.act_cfg)
 
     def forward(self, inputs, prev_output):
         """Forward function."""
@@ -170,6 +177,7 @@ class OCRHead_CON(BaseCascadeDecodeHeadConTrast):
         output["proj_layer3"] = proj_layer3
 
         contrast = self.de_projector(proj_decode)
+        object_context = self.cov1(object_context)
         object_context += contrast
         # project contrast <<<
 

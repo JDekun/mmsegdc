@@ -228,10 +228,6 @@ def CONTRAST_Loss(cls_score_origin,
     labels = labels.squeeze(1).long()
     assert labels.shape[-1] == feats.shape[-1], '{} {}'.format(labels.shape, feats.shape)
 
-    print('predict',predict.shape)
-    print('feats',feats.shape)
-    print('labels',labels.shape)
-
     queue=None
     queue_label=None
     # if memory_size:
