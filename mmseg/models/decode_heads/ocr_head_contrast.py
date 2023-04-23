@@ -178,7 +178,7 @@ class OCRHead_CON(BaseCascadeDecodeHeadConTrast):
 
         contrast = self.de_projector(proj_decode)
         object_context = self.cov1(object_context)
-        object_context += contrast
+        object_context =  object_context + contrast
         # project contrast <<<
 
         ocr = self.cls_seg(object_context)
