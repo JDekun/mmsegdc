@@ -209,7 +209,7 @@ def Contrastive(feats_x, feats_y, labels_, queue=None, queue_label=None, type: s
     loss = loss.mean()
     
     print('(ops_mask * log_prob).sum(1):{}\n'.format((ops_mask * log_prob).sum(1)))
-    print('(ops_mask\n'.format(ops_mask.sum(1))
+    print('labels_\n'.format(labels_))
 
     return loss
 
