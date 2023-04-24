@@ -304,13 +304,13 @@ class BaseDecodeHead(BaseModule, metaclass=ABCMeta):
 
         seg_label = self._stack_batch_gt(batch_data_samples)
         loss = dict()
-        seg_logits = resize(
-            input=seg_logits,
+        seg_logits['out'] = resize(
+            input=seg_logits['out'],
             size=seg_label.shape[2:],
             mode='bilinear',
             align_corners=self.align_corners)
         if self.sampler is not None:
-            seg_weight = self.sampler.sample(seg_logits, seg_label)
+            seg_weight = self.sampler.sample(seg_logits['out'], seg_label)
         else:
             seg_weight = None
         seg_label = seg_label.squeeze(1)
@@ -334,7 +334,7 @@ class BaseDecodeHead(BaseModule, metaclass=ABCMeta):
                     ignore_index=self.ignore_index)
 
         loss['acc_seg'] = accuracy(
-            seg_logits, seg_label, ignore_index=self.ignore_index)
+            seg_logits['out'], seg_label, ignore_index=self.ignore_index)
         return loss
 
     def predict_by_feat(self, seg_logits: Tensor,
@@ -350,9 +350,9 @@ class BaseDecodeHead(BaseModule, metaclass=ABCMeta):
             Tensor: Outputs segmentation logits map.
         """
 
-        seg_logits = resize(
-            input=seg_logits,
+        seg_logits['out'] = resize(
+            input=seg_logits['out'],
             size=batch_img_metas[0]['img_shape'],
             mode='bilinear',
             align_corners=self.align_corners)
-        return seg_logits
+        return seg_logits['out']

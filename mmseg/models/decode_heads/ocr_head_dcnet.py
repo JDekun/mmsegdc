@@ -7,7 +7,7 @@ from mmcv.cnn import ConvModule
 from mmseg.registry import MODELS
 from ..utils import SelfAttentionBlock as _SelfAttentionBlock
 from ..utils import resize
-from .cascade_decode_head_dc import BaseCascadeDecodeHeadDC
+from .cascade_decode_head import BaseCascadeDecodeHead
 
 from collections import OrderedDict
 
@@ -106,7 +106,7 @@ class EncodeProjector(nn.Module):
         return feats
 
 @MODELS.register_module()
-class OCRHead_DC(BaseCascadeDecodeHeadDC):
+class OCRHead_DC(BaseCascadeDecodeHead):
     """Object-Contextual Representations for Semantic Segmentation.
 
     This head is the implementation of `OCRNet

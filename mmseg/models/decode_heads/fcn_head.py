@@ -6,6 +6,7 @@ from mmcv.cnn import ConvModule
 from mmseg.registry import MODELS
 from .decode_head import BaseDecodeHead
 
+from collections import OrderedDict
 
 @MODELS.register_module()
 class FCNHead(BaseDecodeHead):
@@ -92,5 +93,9 @@ class FCNHead(BaseDecodeHead):
     def forward(self, inputs):
         """Forward function."""
         output = self._forward_feature(inputs)
-        output = self.cls_seg(output)
+        fcn = self.cls_seg(output)
+
+        output = OrderedDict()
+        output['out'] = fcn
+
         return output
