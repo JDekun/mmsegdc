@@ -10,7 +10,6 @@ from .ohem_cross_entropy_loss import OhemCrossEntropy
 from .tversky_loss import TverskyLoss
 from .utils import reduce_loss, weight_reduce_loss, weighted_loss
 
-from .cross_entropy_loss_contrast import ContrastCrossEntropyLoss
 from .cross_entropy_loss_dc import CrossEntropyLossDC
 
 __all__ = [
@@ -18,5 +17,5 @@ __all__ = [
     'mask_cross_entropy', 'CrossEntropyLoss', 'reduce_loss',
     'weight_reduce_loss', 'weighted_loss', 'LovaszLoss', 'DiceLoss',
     'FocalLoss', 'TverskyLoss', 'OhemCrossEntropy', 'BoundaryLoss',
-    'ContrastCrossEntropyLoss', 'CrossEntropyLossDC'
+    'CrossEntropyLossDC'
 ]
