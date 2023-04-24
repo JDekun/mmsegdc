@@ -7,6 +7,7 @@ from mmseg.registry import MODELS
 from ..utils import resize
 from .decode_head_dc import BaseDecodeHeadDC
 
+from collections import OrderedDict
 
 class ASPPModule(nn.ModuleList):
     """Atrous Spatial Pyramid Pooling (ASPP) Module.
@@ -118,5 +119,8 @@ class ASPPHeadDC(BaseDecodeHeadDC):
     def forward(self, inputs):
         """Forward function."""
         output = self._forward_feature(inputs)
-        output = self.cls_seg(output)
+        aspp = self.cls_seg(output)
+
+        output = OrderedDict()
+        output['out'] = aspp
         return output

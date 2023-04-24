@@ -252,13 +252,14 @@ class CrossEntropyLoss(nn.Module):
         return s
 
     def forward(self,
-                cls_score,
+                cls_,
                 label,
                 weight=None,
                 avg_factor=None,
                 reduction_override=None,
                 ignore_index=-100,
                 **kwargs):
+        cls_score = cls_['out']
         """Forward function."""
         assert reduction_override in (None, 'none', 'mean', 'sum')
         reduction = (
