@@ -350,9 +350,9 @@ class BaseDecodeHeadDC(BaseModule, metaclass=ABCMeta):
             Tensor: Outputs segmentation logits map.
         """
 
-        seg_logits = resize(
-            input=seg_logits,
+        seg_logits['out'] = resize(
+            input=seg_logits['out'],
             size=batch_img_metas[0]['img_shape'],
             mode='bilinear',
             align_corners=self.align_corners)
-        return seg_logits
+        return seg_logits['out']
