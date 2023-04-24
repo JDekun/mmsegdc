@@ -94,6 +94,8 @@ class BaseDecodeHead(BaseModule, metaclass=ABCMeta):
                  act_cfg=dict(type='ReLU'),
                  in_index=-1,
                  input_transform=None,
+                 projector,
+                 proj_channels,
                  loss_decode=dict(
                      type='CrossEntropyLoss',
                      use_sigmoid=False,
@@ -111,6 +113,9 @@ class BaseDecodeHead(BaseModule, metaclass=ABCMeta):
         self.norm_cfg = norm_cfg
         self.act_cfg = act_cfg
         self.in_index = in_index
+        
+        self.projector = projector
+        self.proj_channels = proj_channels
 
         self.ignore_index = ignore_index
         self.align_corners = align_corners

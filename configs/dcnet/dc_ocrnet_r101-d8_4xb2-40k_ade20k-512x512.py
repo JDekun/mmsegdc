@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/models/ocrnet_r50-d8_dc.py', '../_base_/datasets/ade20k.py',
+    '../_base_/models/ocrnet_r50-d8.py', '../_base_/datasets/ade20k.py',
     '../_base_/default_runtime.py', '../_base_/schedules/schedule_40k.py'
 ]
 norm_cfg = dict(type='SyncBN', requires_grad=True)
