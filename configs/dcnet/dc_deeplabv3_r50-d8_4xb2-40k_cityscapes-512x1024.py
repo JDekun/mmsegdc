@@ -9,7 +9,7 @@ model = dict(data_preprocessor=data_preprocessor,
              pretrained='open-mmlab://resnet101_v1c', 
              backbone=dict(depth=101),
              decode_head=dict(
-                type='ASPPHead',
+                type='ASPPHeadDC',
                 in_channels=2048,
                 in_index=3,
                 channels=512,
@@ -18,5 +18,8 @@ model = dict(data_preprocessor=data_preprocessor,
                 num_classes=19,
                 norm_cfg=norm_cfg,
                 align_corners=False,
+                projector = ['layer3'],
+                proj_channels= 128,
                 loss_decode=dict(
-                    type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0)))
+                    type='CrossEntropyLossDC', use_sigmoid=False, loss_weight=1.0,
+                    layer_weight = [0.1])))

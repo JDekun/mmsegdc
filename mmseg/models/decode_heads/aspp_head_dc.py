@@ -8,6 +8,7 @@ from ..utils import resize
 from .decode_head import BaseDecodeHead
 
 from collections import OrderedDict
+from .base_contrast import EncodeProjector
 
 class ASPPModule(nn.ModuleList):
     """Atrous Spatial Pyramid Pooling (ASPP) Module.
@@ -91,6 +92,14 @@ class ASPPHeadDC(BaseDecodeHead):
             conv_cfg=self.conv_cfg,
             norm_cfg=self.norm_cfg,
             act_cfg=self.act_cfg)
+        
+        # >>> project contrast
+        if self.projector:
+            self.project = EncodeProjector(self.channels, self.projector, self.proj_channels,
+                                            conv_cfg=self.conv_cfg,
+                                            norm_cfg=self.norm_cfg,
+                                            act_cfg=self.act_cfg)
+        
 
     def _forward_feature(self, inputs):
         """Forward function for feature maps before classifying each pixel with
@@ -118,9 +127,13 @@ class ASPPHeadDC(BaseDecodeHead):
 
     def forward(self, inputs):
         """Forward function."""
-        output = self._forward_feature(inputs)
-        aspp = self.cls_seg(output)
+        aspp = self._forward_feature(inputs)
+        
+        out = self.cls_seg(aspp)
+        decode, proj = self.project(aspp, inputs)
 
         output = OrderedDict()
-        output['out'] = aspp
+        output['out'] = out
+        output['decode'] = decode
+        output['proj'] = proj
         return output

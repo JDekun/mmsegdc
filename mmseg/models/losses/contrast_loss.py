@@ -211,16 +211,18 @@ def Contrastive(feats_x, feats_y, labels_, queue=None, queue_label=None, type: s
     return loss
 
 
-def CONTRAST_Loss(cls_score_origin,
+def CONTRAST_Loss(cls_score,
+                decode,
+                layer,
                 labels,
                 memory_size = 0,
                 sample = 'weight_ade_8'):
     
-    feats = cls_score_origin['proj_decode']
-    feats_y = cls_score_origin['proj_layer3']
+    feats = decode
+    feats_y = layer
 
     h, w = feats.shape[2], feats.shape[3]
-    pred = torch.nn.functional.interpolate(input=cls_score_origin['out'], size=(h, w), mode='bilinear', align_corners=False)
+    pred = torch.nn.functional.interpolate(input=cls_score, size=(h, w), mode='bilinear', align_corners=False)
     _, predict = torch.max(pred, 1)
 
     labels = labels.unsqueeze(1).float().clone()

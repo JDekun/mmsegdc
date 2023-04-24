@@ -222,7 +222,8 @@ class CrossEntropyLossDC(nn.Module):
                  class_weight=None,
                  loss_weight=1.0,
                  loss_name='loss_ce',
-                 avg_non_ignore=False):
+                 avg_non_ignore=False,
+                 layer_weight=None):
         super().__init__()
         assert (use_sigmoid is False) or (use_mask is False)
         self.use_sigmoid = use_sigmoid
@@ -231,6 +232,7 @@ class CrossEntropyLossDC(nn.Module):
         self.loss_weight = loss_weight
         self.class_weight = get_class_weight(class_weight)
         self.avg_non_ignore = avg_non_ignore
+        self.layer_weight = layer_weight
         if not self.avg_non_ignore and self.reduction == 'mean':
             warnings.warn(
                 'Default ``avg_non_ignore`` is False, if you would like to '
@@ -260,7 +262,6 @@ class CrossEntropyLossDC(nn.Module):
                 ignore_index=-100,
                 **kwargs):
         cls_score = cls_['out']
-        cls_con = cls_
         """Forward function."""
         assert reduction_override in (None, 'none', 'mean', 'sum')
         reduction = (
@@ -280,12 +281,20 @@ class CrossEntropyLossDC(nn.Module):
             avg_non_ignore=self.avg_non_ignore,
             ignore_index=ignore_index,
             **kwargs)
-        los_con = CONTRAST_Loss(
-            cls_con,
-            label,
-            memory_size = 0,
-            sample = 'weight_ade_8')
-        return loss_cls + 0.1*los_con
+        los_con = 0
+        decode = cls_['decode']
+        for name, layer in cls_['proj']:
+            index = int(name.split("_")[-1]) - 1
+            weight = self.layer_weight[index]
+            los_con = CONTRAST_Loss(
+                cls_score,
+                decode,
+                layer,
+                label,
+                memory_size = 0,
+                sample = 'weight_ade_8')
+            los_con = los_con + weight * los_con
+        return loss_cls + los_con
 
     @property
     def loss_name(self):
