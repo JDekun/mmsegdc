@@ -9,12 +9,9 @@ model = dict(
     pretrained='open-mmlab://resnet101_v1c',
     backbone=dict(depth=101),
     decode_head=[
-        dict(
-            type='FCNHead',
-            num_classes=150
+        dict(num_classes=150
             ),
         dict(
-            type='OCRHead_DC',
             num_classes=150
             )
     ]
