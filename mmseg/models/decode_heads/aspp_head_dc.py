@@ -5,7 +5,7 @@ from mmcv.cnn import ConvModule
 
 from mmseg.registry import MODELS
 from ..utils import resize
-from .decode_head_dc import BaseDecodeHeadDC
+from .decode_head import BaseDecodeHead
 
 from collections import OrderedDict
 
@@ -52,7 +52,7 @@ class ASPPModule(nn.ModuleList):
 
 
 @MODELS.register_module()
-class ASPPHeadDC(BaseDecodeHeadDC):
+class ASPPHeadDC(BaseDecodeHead):
     """Rethinking Atrous Convolution for Semantic Image Segmentation.
 
     This head is the implementation of `DeepLabV3
