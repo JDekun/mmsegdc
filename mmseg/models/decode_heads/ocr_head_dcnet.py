@@ -169,6 +169,7 @@ class OCRHead_DC(BaseCascadeDecodeHead):
 
     def forward(self, inputs, prev_output):
         """Forward function."""
+        prev_output = prev_output['out']
         x = self._transform_inputs(inputs)
         feats = self.bottleneck(x)
         context = self.spatial_gather_module(feats, prev_output)
