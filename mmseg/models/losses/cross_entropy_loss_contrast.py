@@ -59,7 +59,7 @@ class ContrastCrossEntropyLoss(nn.Module):
                 **kwargs):
         """Forward function."""
         cls_score_origin = cls_score
-        cls_score = cls_score['decode']
+        cls_score = cls_score['out']
 
         assert reduction_override in (None, 'none', 'mean', 'sum')
         reduction = (

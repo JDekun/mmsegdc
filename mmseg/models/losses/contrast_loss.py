@@ -220,7 +220,7 @@ def CONTRAST_Loss(cls_score_origin,
     feats_y = cls_score_origin['proj_layer3']
 
     h, w = feats.shape[2], feats.shape[3]
-    pred = torch.nn.functional.interpolate(input=cls_score_origin['decode'], size=(h, w), mode='bilinear', align_corners=False)
+    pred = torch.nn.functional.interpolate(input=cls_score_origin['out'], size=(h, w), mode='bilinear', align_corners=False)
     _, predict = torch.max(pred, 1)
 
     labels = labels.unsqueeze(1).float().clone()

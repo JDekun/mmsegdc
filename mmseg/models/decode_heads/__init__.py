@@ -34,6 +34,7 @@ from .stdc_head import STDCHead
 from .uper_head import UPerHead
 
 from .ocr_head_contrast import OCRHead_CON
+from .ocr_head_dcnet import OCRHead_DC
 
 __all__ = [
     'FCNHead', 'PSPHead', 'ASPPHead', 'PSAHead', 'NLHead', 'GCHead', 'CCHead',
@@ -43,5 +44,5 @@ __all__ = [
     'SETRMLAHead', 'DPTHead', 'SETRMLAHead', 'SegmenterMaskTransformerHead',
     'SegformerHead', 'ISAHead', 'STDCHead', 'IterativeDecodeHead',
     'KernelUpdateHead', 'KernelUpdator', 'MaskFormerHead', 'Mask2FormerHead',
-    'LightHamHead', 'PIDHead', 'OCRHead_CON'
+    'LightHamHead', 'PIDHead', 'OCRHead_CON', 'OCRHead_DC'
 ]

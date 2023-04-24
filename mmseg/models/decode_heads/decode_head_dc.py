@@ -15,7 +15,7 @@ from ..losses import accuracy
 from ..utils import resize
 
 
-class BaseDecodeHeadContrast(BaseModule, metaclass=ABCMeta):
+class BaseDecodeHeadDC(BaseModule, metaclass=ABCMeta):
     """Base class for BaseDecodeHead.
 
     1. The ``init_weights`` method is used to initialize decode_head's

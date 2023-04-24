@@ -7,7 +7,7 @@ from mmcv.cnn import ConvModule
 from mmseg.registry import MODELS
 from ..utils import SelfAttentionBlock as _SelfAttentionBlock
 from ..utils import resize
-from .cascade_decode_head_contrast import BaseCascadeDecodeHeadConTrast
+from .cascade_decode_head_dc import BaseCascadeDecodeHeadDC
 
 from collections import OrderedDict
 
@@ -106,8 +106,12 @@ class EncodeProjector(nn.Module):
         return feats
 
 @MODELS.register_module()
-class OCRHead_CON(BaseCascadeDecodeHeadConTrast):
-    """
+class OCRHead_DC(BaseCascadeDecodeHeadDC):
+    """Object-Contextual Representations for Semantic Segmentation.
+
+    This head is the implementation of `OCRNet
+    <https://arxiv.org/abs/1909.11065>`_.
+
     Args:
         ocr_channels (int): The intermediate channels of OCR block.
         scale (int): The scale of probability map in SpatialGatherModule in
@@ -146,15 +150,15 @@ class OCRHead_CON(BaseCascadeDecodeHeadConTrast):
                                                 conv_cfg=self.conv_cfg,
                                                 norm_cfg=self.norm_cfg,
                                                 act_cfg=self.act_cfg)
-        # self.de_projector = ConvModule(
-        #         proj_channels,
-        #         self.channels,
-        #         1,
-        #         conv_cfg=self.conv_cfg,
-        #         norm_cfg=self.norm_cfg)
-                
+        self.de_projector = ConvModule(
+                proj_channels,
+                self.channels,
+                1,
+                conv_cfg=self.conv_cfg,
+                norm_cfg=self.norm_cfg,
+                act_cfg=None)
         self.relu = nn.ReLU(inplace=True)
-
+        
         # self.cov1 = ConvModule(
         #         self.channels,
         #         self.channels,
@@ -169,7 +173,7 @@ class OCRHead_CON(BaseCascadeDecodeHeadConTrast):
         feats = self.bottleneck(x)
         context = self.spatial_gather_module(feats, prev_output)
         object_context = self.object_context_block(feats, context)
-
+        
         output = OrderedDict()
         # >>> project contrast
         temp = self.projector_decode(object_context)
@@ -179,10 +183,9 @@ class OCRHead_CON(BaseCascadeDecodeHeadConTrast):
         output["proj_decode"] = proj_decode
         output["proj_layer3"] = proj_layer3
 
-        # contrast = self.de_projector(temp)
-        # self.relu(contrast)
+        contrast = self.de_projector(temp)
         # object_context = self.cov1(object_context)
-        # object_context =  self.relu(object_context + contrast)
+        object_context =  self.relu(object_context + contrast)
         # project contrast <<<
 
         ocr = self.cls_seg(object_context)
