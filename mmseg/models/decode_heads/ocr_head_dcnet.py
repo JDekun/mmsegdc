@@ -10,6 +10,7 @@ from ..utils import resize
 from .cascade_decode_head import BaseCascadeDecodeHead
 
 from collections import OrderedDict
+from .base_contrast import EncodeProjector
 
 class SpatialGatherModule(nn.Module):
     """Aggregate the context features according to the initial predicted
@@ -80,30 +81,6 @@ class ObjectAttentionBlock(_SelfAttentionBlock):
             output = resize(query_feats)
 
         return output
-    
-class EncodeProjector(nn.Module):
-    def __init__(self, layer_channels, ocr_channels, proj_channels, conv_cfg, norm_cfg, act_cfg):
-        super().__init__()
-        self.bottleneck = ConvModule(
-            layer_channels,
-            ocr_channels,
-            1,
-            conv_cfg=conv_cfg,
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg)
-        self.projector = ConvModule(
-            ocr_channels,
-            proj_channels,
-            1,
-            conv_cfg=conv_cfg,
-            norm_cfg=norm_cfg,
-            act_cfg=act_cfg)
-        
-    def forward(self, feats):
-        feats = self.bottleneck(feats)
-        feats = self.projector(feats)
-
-        return feats
 
 @MODELS.register_module()
 class OCRHead_DC(BaseCascadeDecodeHead):
@@ -158,7 +135,6 @@ class OCRHead_DC(BaseCascadeDecodeHead):
                 norm_cfg=self.norm_cfg,
                 act_cfg=None)
         self.relu = nn.ReLU(inplace=True)
-        
         # self.cov1 = ConvModule(
         #         self.channels,
         #         self.channels,
