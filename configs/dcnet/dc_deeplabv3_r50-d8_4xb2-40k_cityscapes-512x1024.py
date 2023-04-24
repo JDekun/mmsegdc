@@ -18,7 +18,7 @@ model = dict(data_preprocessor=data_preprocessor,
                 num_classes=19,
                 norm_cfg=norm_cfg,
                 align_corners=False,
-                projector = ['layer3'],
+                projector = ['layer_3'],
                 proj_channels= 128,
                 loss_decode=dict(
                     type='CrossEntropyLossDC', use_sigmoid=False, loss_weight=1.0,
