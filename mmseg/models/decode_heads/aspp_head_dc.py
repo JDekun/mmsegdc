@@ -98,10 +98,22 @@ class ASPPHeadDC(BaseDecodeHead):
                                                 conv_cfg=self.conv_cfg,
                                                 norm_cfg=self.norm_cfg,
                                                 act_cfg=self.act_cfg)
-        self.projector_layer3 = Encode(1024, self.channels, self.proj_channels,
-                                                conv_cfg=self.conv_cfg,
-                                                norm_cfg=self.norm_cfg,
-                                                act_cfg=self.act_cfg)
+        for layer in self.projector:
+            if layer == "layer_4":
+                self.projector_layer4 = Encode(2048, self.channels, self.proj_channels,
+                                                        conv_cfg=self.conv_cfg,
+                                                        norm_cfg=self.norm_cfg,
+                                                        act_cfg=self.act_cfg)
+            elif layer == "layer_3":
+                self.projector_layer3 = Encode(1024, self.channels, self.proj_channels,
+                                                        conv_cfg=self.conv_cfg,
+                                                        norm_cfg=self.norm_cfg,
+                                                        act_cfg=self.act_cfg)
+            elif layer == "layer_3":
+                self.projector_layer2 = Encode(512, self.channels, self.proj_channels,
+                                                        conv_cfg=self.conv_cfg,
+                                                        norm_cfg=self.norm_cfg,
+                                                        act_cfg=self.act_cfg)
         self.de_projector = ConvModule(
                 self.proj_channels,
                 self.channels,
@@ -152,10 +164,19 @@ class ASPPHeadDC(BaseDecodeHead):
         # >>> project contrast
         temp = self.projector_decode(aspp)
         proj_decode = F.normalize(temp, dim=1)
-        proj_layer3 = F.normalize(self.projector_layer3(inputs[2]), dim=1)
-
         output["decode"] = proj_decode
-        layer['layer_3'] = proj_layer3
+        for lay in self.projector:
+            if lay == 'layer_4':
+                proj_layer4 = F.normalize(self.projector_layer4(inputs[3]), dim=1)
+                layer['layer_4'] = proj_layer4
+            elif lay == 'layer_3':
+                proj_layer3 = F.normalize(self.projector_layer3(inputs[2]), dim=1)
+                layer['layer_3'] = proj_layer3
+            elif lay == 'layer_2':
+                proj_layer2 = F.normalize(self.projector_layer2(inputs[1]), dim=1)
+                layer['layer_2'] = proj_layer2
+
+        
         output["proj"] = layer
 
         contrast = self.de_projector(temp)
