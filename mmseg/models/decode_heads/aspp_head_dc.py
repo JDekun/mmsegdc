@@ -8,7 +8,7 @@ from ..utils import resize
 from .decode_head import BaseDecodeHead
 
 from collections import OrderedDict
-from .base_contrast import Encode
+from .base_contrast import Encode, Encode_Down
 import torch.nn.functional as F
 class ASPPModule(nn.ModuleList):
     """Atrous Spatial Pyramid Pooling (ASPP) Module.
@@ -114,6 +114,12 @@ class ASPPHeadDC(BaseDecodeHead):
                                                         conv_cfg=self.conv_cfg,
                                                         norm_cfg=self.norm_cfg,
                                                         act_cfg=self.act_cfg)
+            elif layer == "layer_1":
+                self.projector_layer1 = Encode_Down(256, 256, self.proj_channels,
+                                                        conv_cfg=self.conv_cfg,
+                                                        norm_cfg=self.norm_cfg,
+                                                        act_cfg=self.act_cfg)
+                
         self.de_projector = ConvModule(
                 self.proj_channels,
                 self.channels,
@@ -175,6 +181,9 @@ class ASPPHeadDC(BaseDecodeHead):
             elif lay == 'layer_2':
                 proj_layer2 = F.normalize(self.projector_layer2(inputs[1]), dim=1)
                 layer['layer_2'] = proj_layer2
+            elif lay == 'layer_1':
+                proj_layer1 = F.normalize(self.projector_layer1(inputs[0]), dim=1)
+                layer['layer_1'] = proj_layer1
 
         
         output["proj"] = layer
