@@ -22,4 +22,4 @@ model = dict(data_preprocessor=data_preprocessor,
                 proj_channels= 128,
                 loss_decode=dict(
                     type='CrossEntropyLossDC', use_sigmoid=False, loss_weight=1.0,
-                    layer_weight = [0.1])))
+                    layer_weight = [0, 0, 0.1, 0])))
