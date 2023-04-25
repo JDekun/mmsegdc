@@ -283,7 +283,7 @@ class CrossEntropyLossDC(nn.Module):
             **kwargs)
         los_con = 0
         decode = cls_['decode']
-        for name, layer in cls_['proj']:
+        for name, layer in cls_['proj'].items():
             index = int(name.split("_")[-1]) - 1
             weight = self.layer_weight[index]
             los_con = CONTRAST_Loss(
