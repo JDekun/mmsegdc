@@ -33,7 +33,10 @@ model = dict(
             num_classes=150,
             norm_cfg=norm_cfg,
             align_corners=False,
+            projector = ['layer_3'],
+            proj_channels= 128,
             loss_decode=dict(
-                type='CrossEntropyLossDC', use_sigmoid=False, loss_weight=1.0))
+                type='CrossEntropyLossDC', use_sigmoid=False, loss_weight=1.0,
+                layer_weight = [0, 0, 0.1, 0]))
     ]
     )
