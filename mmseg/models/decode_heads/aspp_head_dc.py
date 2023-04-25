@@ -94,6 +94,7 @@ class ASPPHeadDC(BaseDecodeHead):
             act_cfg=self.act_cfg)
         
         # >>> project contrast
+        self.relu = nn.ReLU(inplace=True)
         if self.projector:
             self.project = EncodeProjector(self.channels, self.projector, self.proj_channels,
                                             conv_cfg=self.conv_cfg,
@@ -128,9 +129,10 @@ class ASPPHeadDC(BaseDecodeHead):
     def forward(self, inputs):
         """Forward function."""
         aspp = self._forward_feature(inputs)
-        
-        out = self.cls_seg(aspp)
-        decode, proj = self.project(aspp, inputs)
+            
+        decode, proj, con= self.project(aspp, inputs)
+        con = self.relu(aspp + con)
+        out = self.cls_seg(con)
 
         output = OrderedDict()
         output['out'] = out

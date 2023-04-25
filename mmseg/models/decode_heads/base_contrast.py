@@ -39,13 +39,12 @@ class EncodeProjector(nn.Module):
                                 conv_cfg=conv_cfg, norm_cfg=norm_cfg, act_cfg=act_cfg))
         
         self.de_projector = ConvModule(
-                self.proj_channels,
-                self.channels,
+                proj_channels,
+                decode_channels,
                 1,
                 conv_cfg=self.conv_cfg,
                 norm_cfg=self.norm_cfg,
                 act_cfg=None)
-        self.relu = nn.ReLU(inplace=True)
         # self.cov1 = ConvModule(
         #         self.channels,
         #         self.channels,
@@ -56,10 +55,11 @@ class EncodeProjector(nn.Module):
         
     def forward(self, decode, inputs):
         proj = OrderedDict()
-        feats = self.decode(decode)
+        decode = self.decode(decode)
+        con = self.de_projector(decode)
 
         for layer in self.layers:
             index = int(layer.split('_')[-1]) - 1
             proj[layer] = self.layers_proj[layer](inputs[index])
 
-        return feats, proj
+        return decode, proj, con

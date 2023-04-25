@@ -94,8 +94,8 @@ class BaseDecodeHead(BaseModule, metaclass=ABCMeta):
                  act_cfg=dict(type='ReLU'),
                  in_index=-1,
                  input_transform=None,
-                 projector,
-                 proj_channels,
+                 projector=None,
+                 proj_channels=None,
                  loss_decode=dict(
                      type='CrossEntropyLoss',
                      use_sigmoid=False,

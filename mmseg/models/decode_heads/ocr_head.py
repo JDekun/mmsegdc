@@ -9,6 +9,7 @@ from ..utils import SelfAttentionBlock as _SelfAttentionBlock
 from ..utils import resize
 from .cascade_decode_head import BaseCascadeDecodeHead
 
+from collections import OrderedDict
 
 class SpatialGatherModule(nn.Module):
     """Aggregate the context features according to the initial predicted
@@ -118,10 +119,14 @@ class OCRHead(BaseCascadeDecodeHead):
 
     def forward(self, inputs, prev_output):
         """Forward function."""
+        prev_output = prev_output['out']
         x = self._transform_inputs(inputs)
         feats = self.bottleneck(x)
         context = self.spatial_gather_module(feats, prev_output)
         object_context = self.object_context_block(feats, context)
-        output = self.cls_seg(object_context)
+        out = self.cls_seg(object_context)
+
+        output = OrderedDict()
+        output["out"] = out
 
         return output
