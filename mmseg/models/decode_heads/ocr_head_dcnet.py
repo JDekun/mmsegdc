@@ -10,7 +10,7 @@ from ..utils import resize
 from .cascade_decode_head import BaseCascadeDecodeHead
 
 from collections import OrderedDict
-from .base_contrast import Encode
+from .base_contrast import Encode, Encode_Down
 
 class SpatialGatherModule(nn.Module):
     """Aggregate the context features according to the initial predicted
@@ -122,10 +122,27 @@ class OCRHead_DC(BaseCascadeDecodeHead):
                                                 conv_cfg=self.conv_cfg,
                                                 norm_cfg=self.norm_cfg,
                                                 act_cfg=self.act_cfg)
-        self.projector_layer3 = Encode(1024, self.channels, self.proj_channels,
-                                                conv_cfg=self.conv_cfg,
-                                                norm_cfg=self.norm_cfg,
-                                                act_cfg=self.act_cfg)
+        for layer in self.projector:
+            if layer == "layer_4":
+                self.projector_layer4 = Encode(2048, self.channels, self.proj_channels,
+                                                        conv_cfg=self.conv_cfg,
+                                                        norm_cfg=self.norm_cfg,
+                                                        act_cfg=self.act_cfg)
+            elif layer == "layer_3":
+                self.projector_layer3 = Encode(1024, self.channels, self.proj_channels,
+                                                        conv_cfg=self.conv_cfg,
+                                                        norm_cfg=self.norm_cfg,
+                                                        act_cfg=self.act_cfg)
+            elif layer == "layer_2":
+                self.projector_layer2 = Encode(512, self.channels, self.proj_channels,
+                                                        conv_cfg=self.conv_cfg,
+                                                        norm_cfg=self.norm_cfg,
+                                                        act_cfg=self.act_cfg)
+            elif layer == "layer_1":
+                self.projector_layer1 = Encode_Down(256, 256, self.proj_channels,
+                                                        conv_cfg=self.conv_cfg,
+                                                        norm_cfg=self.norm_cfg,
+                                                        act_cfg=self.act_cfg)
         self.de_projector = ConvModule(
                 self.proj_channels,
                 self.channels,
@@ -155,10 +172,22 @@ class OCRHead_DC(BaseCascadeDecodeHead):
         # >>> project contrast
         temp = self.projector_decode(object_context)
         proj_decode = F.normalize(temp, dim=1)
-        proj_layer3 = F.normalize(self.projector_layer3(inputs[2]), dim=1)
-
         output["decode"] = proj_decode
-        layer['layer_3'] = proj_layer3
+
+        for lay in self.projector:
+            if lay == 'layer_4':
+                proj_layer4 = F.normalize(self.projector_layer4(inputs[3]), dim=1)
+                layer['layer_4'] = proj_layer4
+            elif lay == 'layer_3':
+                proj_layer3 = F.normalize(self.projector_layer3(inputs[2]), dim=1)
+                layer['layer_3'] = proj_layer3
+            elif lay == 'layer_2':
+                proj_layer2 = F.normalize(self.projector_layer2(inputs[1]), dim=1)
+                layer['layer_2'] = proj_layer2
+            elif lay == 'layer_1':
+                proj_layer1 = F.normalize(self.projector_layer1(inputs[0]), dim=1)
+                layer['layer_1'] = proj_layer1
+
         output["proj"] = layer
 
         contrast = self.de_projector(temp)

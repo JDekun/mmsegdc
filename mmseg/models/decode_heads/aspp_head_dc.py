@@ -184,7 +184,6 @@ class ASPPHeadDC(BaseDecodeHead):
             elif lay == 'layer_1':
                 proj_layer1 = F.normalize(self.projector_layer1(inputs[0]), dim=1)
                 layer['layer_1'] = proj_layer1
-
         
         output["proj"] = layer
 
