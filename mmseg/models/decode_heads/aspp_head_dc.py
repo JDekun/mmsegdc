@@ -109,7 +109,7 @@ class ASPPHeadDC(BaseDecodeHead):
                                                         conv_cfg=self.conv_cfg,
                                                         norm_cfg=self.norm_cfg,
                                                         act_cfg=self.act_cfg)
-            elif layer == "layer_3":
+            elif layer == "layer_2":
                 self.projector_layer2 = Encode(512, self.channels, self.proj_channels,
                                                         conv_cfg=self.conv_cfg,
                                                         norm_cfg=self.norm_cfg,
