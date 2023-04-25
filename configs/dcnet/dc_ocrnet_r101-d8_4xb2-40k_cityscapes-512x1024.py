@@ -34,5 +34,6 @@ model = dict(
             norm_cfg=norm_cfg,
             align_corners=False,
             loss_decode=dict(
-                type='CrossEntropyLossDC', use_sigmoid=False, loss_weight=1.0))
+                type='CrossEntropyLossDC', use_sigmoid=False, loss_weight=1.0,
+                layer_weight = [0, 0, 0.1, 0])))
     ])
