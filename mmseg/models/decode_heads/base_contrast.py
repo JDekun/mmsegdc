@@ -2,41 +2,50 @@ import torch.nn as nn
 from mmcv.cnn import ConvModule
 from collections import OrderedDict
 
+class Encode(nn.Module):
+    def __init__(self, layer_channels, ocr_channels, proj_channels, conv_cfg, norm_cfg, act_cfg):
+        super().__init__()
+        self.bottleneck = ConvModule(
+            layer_channels,
+            ocr_channels,
+            1,
+            conv_cfg=conv_cfg,
+            norm_cfg=norm_cfg,
+            act_cfg=act_cfg)
+        self.projector = ConvModule(
+            ocr_channels,
+            proj_channels,
+            1,
+            conv_cfg=conv_cfg,
+            norm_cfg=norm_cfg,
+            act_cfg=act_cfg)
+        
+    def forward(self, feats):
+        feats = self.bottleneck(feats)
+        feats = self.projector(feats)
+
+        return feats
+
 class EncodeProjector(nn.Module):
     def __init__(self, decode_channels, layers, proj_channels, conv_cfg, norm_cfg, act_cfg):
         super().__init__()
         self.layers = layers
-        self.decode = nn.Sequential(
-            ConvModule(decode_channels, decode_channels, 1,
-                        conv_cfg=conv_cfg, norm_cfg=norm_cfg, act_cfg=act_cfg),
-            ConvModule(decode_channels, proj_channels, 1,
-                        conv_cfg=conv_cfg, norm_cfg=norm_cfg, act_cfg=act_cfg)) 
+        self.decode = Encode(decode_channels, decode_channels, proj_channels,
+                        conv_cfg=conv_cfg, norm_cfg=norm_cfg, act_cfg=act_cfg)
         self.layers_proj = OrderedDict()
         for layer in self.layers:
             if layer == 'layer_4':
-                self.layers_proj['layer_4'] = nn.Sequential(
-                    ConvModule(2048, decode_channels, 1,
-                                conv_cfg=conv_cfg, norm_cfg=norm_cfg, act_cfg=act_cfg),
-                    ConvModule(decode_channels, proj_channels, 1,
-                                conv_cfg=conv_cfg, norm_cfg=norm_cfg, act_cfg=act_cfg))
+                self.layers_proj['layer_4'] = Encode(2048, decode_channels, proj_channels,
+                        conv_cfg=conv_cfg, norm_cfg=norm_cfg, act_cfg=act_cfg)
             if layer == 'layer_3':
-                self.layers_proj['layer_3'] = nn.Sequential(
-                    ConvModule(1024, decode_channels, 1,
-                                conv_cfg=conv_cfg, norm_cfg=norm_cfg, act_cfg=act_cfg),
-                    ConvModule(decode_channels, proj_channels, 1,
-                                conv_cfg=conv_cfg, norm_cfg=norm_cfg, act_cfg=act_cfg))
+                self.layers_proj['layer_3'] = Encode(1024, decode_channels, proj_channels,
+                        conv_cfg=conv_cfg, norm_cfg=norm_cfg, act_cfg=act_cfg)
             if layer == 'layer_2':
-                self.layers_proj['layer_2'] = nn.Sequential(
-                    ConvModule(512, decode_channels, 1,
-                                conv_cfg=conv_cfg, norm_cfg=norm_cfg, act_cfg=act_cfg),
-                    ConvModule(decode_channels, proj_channels, 1,
-                                conv_cfg=conv_cfg, norm_cfg=norm_cfg, act_cfg=act_cfg))
+                self.layers_proj['layer_2'] = Encode(512, decode_channels, proj_channels,
+                        conv_cfg=conv_cfg, norm_cfg=norm_cfg, act_cfg=act_cfg)
             if layer == 'layer_1':
-                self.layers_proj['layer_1'] = nn.Sequential(
-                    ConvModule(256, 256, 1,
-                                conv_cfg=conv_cfg, norm_cfg=norm_cfg, act_cfg=act_cfg),
-                    ConvModule(256, proj_channels, 1,
-                                conv_cfg=conv_cfg, norm_cfg=norm_cfg, act_cfg=act_cfg))
+                self.layers_proj['layer_1'] = Encode(256, 256, proj_channels,
+                        conv_cfg=conv_cfg, norm_cfg=norm_cfg, act_cfg=act_cfg)
         
         self.de_projector = ConvModule(
                 proj_channels,
