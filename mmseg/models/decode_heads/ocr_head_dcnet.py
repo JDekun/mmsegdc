@@ -10,7 +10,7 @@ from ..utils import resize
 from .cascade_decode_head import BaseCascadeDecodeHead
 
 from collections import OrderedDict
-from .base_contrast import EncodeProjector
+from .base_contrast import Encode
 
 class SpatialGatherModule(nn.Module):
     """Aggregate the context features according to the initial predicted
@@ -119,11 +119,11 @@ class OCRHead_DC(BaseCascadeDecodeHead):
             act_cfg=self.act_cfg)
         
         # >>> project contrast
-        self.projector_decode = EncodeProjector(self.channels, self.channels, self.proj_channels,
+        self.projector_decode = Encode(self.channels, self.channels, self.proj_channels,
                                                 conv_cfg=self.conv_cfg,
                                                 norm_cfg=self.norm_cfg,
                                                 act_cfg=self.act_cfg)
-        self.projector_layer3 = EncodeProjector(1024, self.channels, self.proj_channels,
+        self.projector_layer3 = Encode(1024, self.channels, self.proj_channels,
                                                 conv_cfg=self.conv_cfg,
                                                 norm_cfg=self.norm_cfg,
                                                 act_cfg=self.act_cfg)
@@ -152,13 +152,15 @@ class OCRHead_DC(BaseCascadeDecodeHead):
         object_context = self.object_context_block(feats, context)
         
         output = OrderedDict()
+        layer = OrderedDict()
         # >>> project contrast
         temp = self.projector_decode(object_context)
         proj_decode = F.normalize(temp, dim=1)
         proj_layer3 = F.normalize(self.projector_layer3(inputs[2]), dim=1)
 
-        output["proj_decode"] = proj_decode
-        output["proj_layer3"] = proj_layer3
+        output["decode"] = proj_decode
+        layer['layer_3'] = proj_layer3
+        output["proj"] = layer
 
         contrast = self.de_projector(temp)
         # object_context = self.cov1(object_context)
