@@ -118,5 +118,8 @@ class ASPPHead(BaseDecodeHead):
     def forward(self, inputs):
         """Forward function."""
         output = self._forward_feature(inputs)
-        output = self.cls_seg(output)
-        return output
+        out = self.cls_seg(output)
+        
+        output = dict()
+        output['out'] = out
+        return out
