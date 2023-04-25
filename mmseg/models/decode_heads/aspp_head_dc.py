@@ -8,8 +8,8 @@ from ..utils import resize
 from .decode_head import BaseDecodeHead
 
 from collections import OrderedDict
-from .base_contrast import EncodeProjector
-
+from .base_contrast import Encode
+import torch.nn.functional as F
 class ASPPModule(nn.ModuleList):
     """Atrous Spatial Pyramid Pooling (ASPP) Module.
 
@@ -94,12 +94,29 @@ class ASPPHeadDC(BaseDecodeHead):
             act_cfg=self.act_cfg)
         
         # >>> project contrast
+        self.projector_decode = Encode(self.channels, self.channels, self.proj_channels,
+                                                conv_cfg=self.conv_cfg,
+                                                norm_cfg=self.norm_cfg,
+                                                act_cfg=self.act_cfg)
+        self.projector_layer3 = Encode(1024, self.channels, self.proj_channels,
+                                                conv_cfg=self.conv_cfg,
+                                                norm_cfg=self.norm_cfg,
+                                                act_cfg=self.act_cfg)
+        self.de_projector = ConvModule(
+                self.proj_channels,
+                self.channels,
+                1,
+                conv_cfg=self.conv_cfg,
+                norm_cfg=self.norm_cfg,
+                act_cfg=None)
         self.relu = nn.ReLU(inplace=True)
-        if self.projector:
-            self.project = EncodeProjector(self.channels, self.projector, self.proj_channels,
-                                            conv_cfg=self.conv_cfg,
-                                            norm_cfg=self.norm_cfg,
-                                            act_cfg=self.act_cfg)
+        # self.cov1 = ConvModule(
+        #         self.channels,
+        #         self.channels,
+        #         1,
+        #         conv_cfg=self.conv_cfg,
+        #         norm_cfg=self.norm_cfg,
+        #         act_cfg=self.act_cfg)
         
 
     def _forward_feature(self, inputs):
@@ -129,13 +146,24 @@ class ASPPHeadDC(BaseDecodeHead):
     def forward(self, inputs):
         """Forward function."""
         aspp = self._forward_feature(inputs)
-            
-        decode, proj, con= self.project(aspp, inputs)
-        con = self.relu(aspp + con)
-        out = self.cls_seg(con)
 
         output = OrderedDict()
+        layer = OrderedDict()
+        # >>> project contrast
+        temp = self.projector_decode(aspp)
+        proj_decode = F.normalize(temp, dim=1)
+        proj_layer3 = F.normalize(self.projector_layer3(inputs[2]), dim=1)
+
+        output["decode"] = proj_decode
+        layer['layer_3'] = proj_layer3
+        output["proj"] = layer
+
+        contrast = self.de_projector(temp)
+        # object_context = self.cov1(object_context)
+        aspp =  self.relu(aspp + contrast)
+        # project contrast <<<
+        out = self.cls_seg(aspp)
+        
         output['out'] = out
-        output['decode'] = decode
-        output['proj'] = proj
+        
         return output
