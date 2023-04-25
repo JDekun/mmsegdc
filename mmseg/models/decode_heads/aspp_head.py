@@ -122,4 +122,4 @@ class ASPPHead(BaseDecodeHead):
         
         output = dict()
         output['out'] = out
-        return out
+        return output
