@@ -95,10 +95,9 @@ class OCRHead_DC(BaseCascadeDecodeHead):
             Default: 1.
     """
 
-    def __init__(self, ocr_channels, proj_channels=128, scale=1, **kwargs):
+    def __init__(self, ocr_channels, scale=1, **kwargs):
         super().__init__(**kwargs)
         self.ocr_channels = ocr_channels
-        self.proj_channels = proj_channels
         self.scale = scale
         self.object_context_block = ObjectAttentionBlock(
             self.channels,
@@ -128,7 +127,7 @@ class OCRHead_DC(BaseCascadeDecodeHead):
                                                 norm_cfg=self.norm_cfg,
                                                 act_cfg=self.act_cfg)
         self.de_projector = ConvModule(
-                proj_channels,
+                self.proj_channels,
                 self.channels,
                 1,
                 conv_cfg=self.conv_cfg,
