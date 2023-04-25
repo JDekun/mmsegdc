@@ -39,3 +39,8 @@ model = dict(
                 type='CrossEntropyLossDC', use_sigmoid=False, loss_weight=1.0,
                 layer_weight = [0.1, 0.1, 0.1, 0.1]))
     ])
+
+optimizer=dict(
+    paramwise_cfg = dict(
+        custom_keys={
+            'head': dict(lr_mult=10.)}))
