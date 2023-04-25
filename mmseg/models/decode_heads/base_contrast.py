@@ -42,8 +42,8 @@ class EncodeProjector(nn.Module):
                 proj_channels,
                 decode_channels,
                 1,
-                conv_cfg=self.conv_cfg,
-                norm_cfg=self.norm_cfg,
+                conv_cfg=conv_cfg,
+                norm_cfg=norm_cfg,
                 act_cfg=None)
         # self.cov1 = ConvModule(
         #         self.channels,
