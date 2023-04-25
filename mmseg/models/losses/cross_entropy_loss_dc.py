@@ -286,6 +286,7 @@ class CrossEntropyLossDC(nn.Module):
         for name, layer in cls_['proj'].items():
             index = int(name.split("_")[-1]) - 1
             weight = self.layer_weight[index]
+            print(weight)
             los_con = CONTRAST_Loss(
                 cls_score,
                 decode,
